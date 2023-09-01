@@ -1,5 +1,4 @@
-const express = require('express');
-const { param, body, validationResult } = require('express-validator');
+const express = require("express");
 
 const {
   getCategories,
@@ -8,25 +7,28 @@ const {
   createCategory,
   updateCategory,
   deleteCategory,
-} = require('../services/categoryService');
-const { getCategoryValidator, updateCategoryValidator, deleteCategoryValidator, createCategoryValidator } = require('../utils/validators/categoryValidator');
+} = require("../services/categoryService");
+
+const {
+  getCategoryValidator,
+  updateCategoryValidator,
+  deleteCategoryValidator,
+  createCategoryValidator,
+} = require("../utils/validators/categoryValidator");
 
 const router = express.Router();
 
 router
-  .route('/')
-    .post(createCategoryValidator, createCategory)
-    .get(getCategories);
+  .route("/")
+  .post(createCategoryValidator, createCategory)
+  .get(getCategories);
+
+router.route("/get").get(getCategoryByName);
 
 router
-  .route('/get')
-  .get(getCategoryByName);
-
-
-  router
-  .route('/:id')
+  .route("/:id")
   .get(getCategoryValidator, getCategoryByID)
-    .put(updateCategoryValidator, updateCategory)
-    .delete(deleteCategoryValidator, deleteCategory);
+  .put(updateCategoryValidator, updateCategory)
+  .delete(deleteCategoryValidator, deleteCategory);
 
 module.exports = router;
