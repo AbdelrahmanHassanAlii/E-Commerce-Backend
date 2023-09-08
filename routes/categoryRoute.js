@@ -1,3 +1,4 @@
+/* eslint-disable node/no-missing-require */
 const express = require("express");
 
 const {
@@ -16,14 +17,22 @@ const {
   createCategoryValidator,
 } = require("../utils/validators/categoryValidator");
 
+const subCategoryRoute = require("./subCategoryRoute");
+
 const router = express.Router();
 
+
+router.use('/:categoryId/subcategories', subCategoryRoute);
+
+
 router
-  .route("/")
+.route("/")
   .post(createCategoryValidator, createCategory)
   .get(getCategories);
 
 router.route("/get").get(getCategoryByName);
+
+
 
 router
   .route("/:id")
