@@ -4,6 +4,14 @@ const ApiError = require("../utils/apiError");
 
 const subCategoryModel = require("../models/subCategoryModel");
 
+// @desc   --->    middleware for getting a subcategory
+exports.setCategoryIdToBody = (req, res, next) => {
+  if(!req.body.category){
+    req.body.category = req.params.categoryId;
+  }
+  next();
+};
+
 // @desc   --->    Create New subCategory
 // @route  --->    Post    /api/v1/subCategories
 // @access --->    Private by Admin
@@ -17,6 +25,15 @@ exports.createSubCategory = asyncHandler(async (req, res) => {
   res.status(201).json({ data: subCategory });
 });
 
+// @desc   --->    middleware for getting all subcategories
+exports.createFilterObj = (req, res, next) => {
+  let filterObject = {} ;
+  if (req.params.categoryId) {
+    filterObject = { category: req.params.categoryId };
+  }
+  req.filterObj = filterObject;
+  next();
+};
 // @desc   --->    Get All sucCategories
 // @route  --->    Get    /api/v1/subcategories || /api/v1/subcategories?page=3&limit=2
 // @access --->    Public
@@ -24,12 +41,9 @@ exports.getSubCategories = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 5;
   const skip = (page - 1) * limit;
-  let filterObject = { } ;
-  if (req.params.categoryId) {
-    filterObject = { category: req.params.categoryId };
-  }
+  
   const subCategories = await subCategoryModel
-    .find(filterObject)
+    .find(req.filterObj)
     .skip(skip)
     .limit(limit)
     .populate({ path: "category", select: "name" });
