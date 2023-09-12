@@ -11,7 +11,12 @@ exports.getProducts = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 5;
   const skip = (page - 1) * limit;
-  const products = await productModel.find({}).skip(skip).limit(limit);
+
+  const products = await productModel
+    .find({})
+    .skip(skip)
+    .limit(limit)
+    .populate({ path: "category", select: "name" });
   res.status(200).json({ results: products.length, page, data: products });
 });
 
@@ -20,7 +25,9 @@ exports.getProducts = asyncHandler(async (req, res) => {
 // @access --->    Public
 exports.getProductByID = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const product = await productModel.findById(id);
+  const product = await productModel
+    .findById(id)
+    .populate({ path: "category", select: "name" });
   if (!product) {
     return next(new ApiError(`No Product for this id ${id}`, 404));
   }
@@ -32,7 +39,9 @@ exports.getProductByID = asyncHandler(async (req, res, next) => {
 // @access --->    Public
 exports.getProductByName = asyncHandler(async (req, res, next) => {
   const { name } = req.query;
-  const product = await productModel.findOne({ name: name });
+  const product = await productModel
+    .findOne({ name: name })
+    .populate({ path: "category", select: "name" });
   if (!product) {
     return next(new ApiError(`No Product for this name ${name}`, 404));
   }
@@ -53,13 +62,14 @@ exports.createProduct = asyncHandler(async (req, res) => {
 // @access --->    Private by Admin
 exports.updateProduct = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  req.body.slug = slugify(req.body.title);
-  const product = await productModel.findOneAndUpdate(
-    { _id: id },
-    req.body, {
-        new: true,
-    }
-  );
+  if (req.body.title) {
+    req.body.slug = slugify(req.body.title);
+  } 
+  const product = await productModel
+    .findOneAndUpdate({ _id: id }, req.body, {
+      new: true,
+    })
+    .populate({ path: "category", select: "name" });
   if (!product) {
     return next(new ApiError(`No Product for this id ${id}`, 404));
   }
